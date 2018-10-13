@@ -18,6 +18,22 @@ users = db.users
 doctors=db.doctors
 addrequests=db.addrequests
 
+# addrequests.insert_one({
+#         "permission": "Yes",
+#         "used": "No",
+#         "name": "Aditya Bhardwaj",
+#         "key": "abc",
+#         "email":"aditya.1998bhardwaj@gmail.com"
+        
+#     })
+
+# users.delete_many({})
+# doctors.delete_many({})
+# addrequests.delete_many({})
+
+x=users.find()
+for i in x:
+    print(i)
 
 username = "aditya.1998bhardwaj@gmail.com"
 password = "Wd85RaFy76Xrw3QBx"
@@ -56,11 +72,23 @@ def diagnose():
         symptomID = request.args.get('ID')
         gender = request.args.get('gender')
         dob = request.args.get('DOB')
+        print(symptomID)
         symptomID=symptomID.split(',')
         info = diagnosis.loadDiagnosis(symptomID,gender,int(dob))
-        psymptoms = diagnosis.loadProposedSymptoms(symptomID,gender,int(dob))
-        info.append(psymptoms)
-        return json_response(info)
+        
+        s=""
+        B=[]
+        for i in info:
+            for j in i['Specialisation']:
+                s = s+','+j['Name'] 
+            doc={
+                'name':i['Issue']['Name'],
+                'specialisation':s[1:],
+                'profname':i['Issue']['ProfName'],
+                'accuracy':i['Issue']['Accuracy']
+            }
+            B.append(doc)
+        return json_response(B)
 
 
         
@@ -166,11 +194,12 @@ def add(ID):
             print(x)
             patient=users.find_one({'email':result['email']})
             doc=doctors.find_one({'_id':ObjectId(ID)})
+            print(patient)
             if(doc['patients']=="None"):
                 A=[patient]
             else:
                 A=doc['patients']
-                A.append(patient)
+                A.append(patient['history'])
             doc1=doctors.update_one({'_id':ObjectId(ID)},{'$set':{'patients':A}})
             return render_template('addrecord.html',patient=patient,url=url)
         
@@ -179,7 +208,7 @@ def history():
     if(request.method=="GET"):
         email=request.args.get('email')
         user=users.find_one({'email':email})
-        return json_response(user)
+        return json_response(user['history'])
     if(request.method=="POST"):
         name=request.form['name']
         date=request.form['date']
@@ -212,8 +241,15 @@ def generate():
     req = addrequests.find({})
     A=[]
     for i in req:
+        print(i)
         A.append({'name':i['name'],'key':i['key'],'permission':i['permission'],'used':i['used']})
     return json_response(A)
+    
+@app.route('/allow')
+def allow():
+    key=request.args.get('key')
+    addrequests.update_one({'key':key},{'$set':{'allowed':'Yes'}})
+    return "Yes"
     
 @app.route('/signup')
 def signup():
