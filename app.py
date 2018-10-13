@@ -134,6 +134,7 @@ def addkey(ID):
         key = base64.b64encode(rawHashString).decode()
         req={
             'name':name,
+            'docid':ID,
             'email':email,
             'used':used,
             'permission':permission,
@@ -151,26 +152,37 @@ def add(ID):
         url="/home/"+ID
         return render_template("add.html",error=error,url=url)
     if(request.method=="POST"):
+        url="/home/"+ID
         key=request.form['key']
         result = addrequests.find_one({'key':key})
         if(result['used']=="Yes" or result['permission']=="No"):
             error="Key not valid"
-            url="/home/"+ID
+            
             return render_template('add.html',error=error,url=url)
         else:
             x=addrequests.update_one({'key':key},{'$set':{'used':"Yes"}})
             print(x)
-            return render_template('/add.html',email=result['email'])
+            patient=users.find_one({'email':result['email']})
+            doc=doctors.find_one({'_id':ObjectId(ID)})
+            if(doc['patients']=="None"):
+                A=[patient]
+            else:
+                A=doc['patients']
+                A.append(patient)
+            doc1=doctors.update_one({'_id':ObjectId(ID)},{'$set':{'patients':A}})
+            return render_template('addrecord.html',email=result['email'])
         
 
 
 @app.route('/key')
 def generate():
-    x=request.args.get('name')
-    x=x+str(datetime.datetime.now())
-    rawHashString = hmac.new(bytes(x, encoding='utf-8'), x.encode('utf-8')).digest()
-    computedHashString = base64.b64encode(rawHashString).decode()
-    return computedHashString
+    email=request.args.get('email')
+    req = addrequests.find({'email':email})
+    A=[]
+    for i in req:
+        A.append({'name':i['Name'],'ID':i['docid']})
+    return json_response(A)
+    
     
 @app.route('/signup')
 def signup():
