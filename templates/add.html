@@ -27,7 +27,7 @@
       </ul>
       <ul class="navbar-nav justify-content-end">
           <li class="nav-item">
-        <a class="nav-link link1" href="#">Home</a>
+        <a class="nav-link link1" href={{url}}>Home </a>
       </li>
       <li class="nav-item">
         <a class="nav-link link1" href={{addurl}}>Add Patient </a>
@@ -47,9 +47,7 @@
 <br>
 <br>
 
-{% if doc['patients']=="None" %}
-    <h1>FUCK OFF</h1>
-{% endif %}
+
 </div>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>
 		

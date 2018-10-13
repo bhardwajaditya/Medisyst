@@ -60,13 +60,7 @@ def diagnose():
         info.append(psymptoms)
         return json_response(info)
 
-@app.route('/bodylocations',methods = ['POST', 'GET'])
-def bodylocations():
-    if(request.method=='GET'):
-        return render_template('diagnosis.html')
-    if(request.method=='POST'):
-        x=request.form.getlist("example-getting-started")
-        return '<br>'.join(x)
+
         
 @app.route('/signin',methods = ['POST', 'GET'])
 def login():
@@ -124,7 +118,9 @@ def register():
 def home(ID):
     doc=doctors.find_one({'_id':ObjectId(ID)})
     print(doc['patients'])
-    return render_template('home.html',doc=doc)
+    url="/home/"+str(doc['_id'])
+    addurl=url+"/add"
+    return render_template('home.html',doc=doc,addurl=addurl)
 
 @app.route('/home/<ID>/addkey')
 def addkey(ID):
@@ -146,21 +142,27 @@ def addkey(ID):
         y=addrequests.insert_one(req)
         url="/home/"+ID
         return redirect(url)
+
         
 @app.route('/home/<ID>/add')
 def add(ID):
     if(request.method=="GET"):
-        return render_template("add.html")
+        error=""
+        url="/home/"+ID
+        return render_template("add.html",error=error,url=url)
     if(request.method=="POST"):
         key=request.form['key']
-        result = add.requests
+        result = addrequests.find_one({'key':key})
+        if(result['used']=="Yes" or result['permission']=="No"):
+            error="Key not valid"
+            url="/home/"+ID
+            return render_template('add.html',error=error,url=url)
+        else:
+            x=addrequests.update_one({'key':key},{'$set':{'used':"Yes"}})
+            print(x)
+            return render_template('/add.html',email=result['email'])
         
-@app.route('/sublocations')
-def sublocations():
-    bodyID=request.args.get('ID')
-    gender = request.args.get('Gender')
-    slocations = diagnosis.loadSublocationSymptoms(bodyID,int(gender))
-    return json_response(slocations)
+
 
 @app.route('/key')
 def generate():
