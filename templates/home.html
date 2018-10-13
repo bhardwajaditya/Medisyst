@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+	<html>
+	<head>
+		<title>MediSyst</title>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<script
+	src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		
+
+	</head>
+	<body>
+	    
+	    <nav class="navbar navbar-expand-lg navbar-light bg fixed-top">
+	        <div class="container">
+  <a class="navbar-brand head2" href="#">MediSyst</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      </ul>
+      <ul class="navbar-nav justify-content-end">
+          <li class="nav-item">
+        <a class="nav-link link1" href="#">Welcome {{doc['fname']}} </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link link1" href="#">Add Patient </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link link1" href="#">Log out</a>
+      </li>
+      
+      </ul>
+    
+  </div>
+  </div>
+</nav>
+
+<div class="container">
+    <br>
+<br>
+<br>
+
+{{doc['patients']}}
+</div>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>
+		
+    </body>
+</html>

@@ -1,6 +1,6 @@
 import pymongo
 from pymongo import MongoClient
-from flask import Flask, request,make_response,render_template, url_for, request
+from flask import Flask, request,make_response,render_template, url_for, request,redirect
 import hmac, hashlib
 import base64
 import os
@@ -9,10 +9,13 @@ import csv
 import diagnosisClient
 from googlesearch import search
 from commons import json_response
+from bson.objectid import ObjectId
+
 
 client = MongoClient()
 db = client['medisyst']
 users = db.users
+doctors=db.doctors
 
 username = "aditya.1998bhardwaj@gmail.com"
 password = "Wd85RaFy76Xrw3QBx"
@@ -56,17 +59,71 @@ def diagnose():
         info.append(psymptoms)
         return json_response(info)
 
-@app.route('/bodylocations')
+@app.route('/bodylocations',methods = ['POST', 'GET'])
 def bodylocations():
-    A=[]
-    bodylocation = diagnosis.loadBodyLocations()
-    for i in bodylocation:
-        res={
-            'Name':i['Name'],
-            'ID':i['ID']
-        }
-        A.append(res)
-    return json_response(A)
+    if(request.method=='GET'):
+        return render_template('diagnosis.html')
+    if(request.method=='POST'):
+        x=request.form.getlist("example-getting-started")
+        return '<br>'.join(x)
+        
+@app.route('/signin',methods = ['POST', 'GET'])
+def login():
+    if(request.method=='GET'):
+        error=""
+        return render_template('login.html',error=error)
+    if(request.method=="POST"):
+        email=request.form['email']
+        password=request.form['password']
+        A=[]
+        doc=doctors.find_one({"email":email})
+        print(doc)
+        if(doc!=None):
+            if(doc['password']==password):
+                url='/home/'+str(doc['_id'])
+                return redirect(url)
+            else:
+                error="Password Incorrect"
+                return render_template('login.html',error=error)
+        else:
+            return render_template('signup.html')
+            
+@app.route('/register',methods = ['POST', 'GET'])
+def register():
+    if(request.method=="GET"):
+        return render_template('signup.html')
+    if(request.method=="POST"):
+        fname=request.form['fname']
+        lname=request.form['lname']
+        docid=request.form['docid']
+        email=request.form['email']
+        password=request.form['password']
+        A=[]
+        doc=doctors.find({'email':email})
+        for i in doc:
+            A.append(i)
+        if(len(A)==0):
+            doctor={
+                'fname':fname,
+                'lname':lname,
+                'docid':docid,
+                'email':email,
+                'password':password,
+                'patients':"None"
+            }
+            doc=doctors.insert(doctor)
+            doc=doctors.find_one({"email":email})
+            print(doc)
+            url='/home/'+str(doc['_id'])
+            return redirect(url)
+        else:
+            return redirect("/signin")
+    
+@app.route('/home/<ID>')
+def home(ID):
+    doc=doctors.find_one({'_id':ObjectId(ID)})
+    print(doc['patients'])
+    return render_template('home.html',doc=doc)
 
 @app.route('/sublocations')
 def sublocations():
