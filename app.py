@@ -7,6 +7,7 @@ import os
 import datetime
 import csv
 import diagnosisClient
+from googlesearch import search
 from commons import json_response
 
 client = MongoClient()
@@ -21,7 +22,6 @@ language = "en-gb"
 
 app = Flask(__name__)
 diagnosis = diagnosisClient.DiagnosisClient(username, password, authUrl, language, healthUrl)
-
 
 
 @app.route('/')
@@ -78,5 +78,55 @@ def generate():
     rawHashString = hmac.new(bytes(x, encoding='utf-8'), x.encode('utf-8')).digest()
     computedHashString = base64.b64encode(rawHashString).decode()
     return computedHashString
+    
+@app.route('/signup')
+def signup():
+    email=request.args.get('email')
+    password=request.args.get('password')
+    aadhaar = request.args.get('aadhaar')
+    gender = request.args.get('gender')
+    fname = request.args.get('fname')
+    lname =request.args.get('lname')
+    dob = request.args.get('dob')
+    A=[]
+    x=users.find({"email":email})
+    for i in x:
+        A.append(x)
+    if(len(A)==0):
+        user={
+            "email":email,
+            "password":password,
+            "aadhaar":aadhaar,
+            "gender":gender,
+            "fname":fname,
+            "lname":lname,
+            "dob":dob
+        }
+        x=users.insert_one(user)
+        print(x)
+        return "yes"
+    else:
+        return 'no'
+
+@app.route('/login')
+def signin():
+    email=request.args.get('email')
+    password=request.args.get('password')
+    A=[]
+    x=users.find_one({"email":email})
+    print(x)
+    if(x['password']==password):
+        return "yes"
+    else:
+        return "no"
+        
+@app.route('/search')
+def gsearch():
+    query = request.args.get('query')
+    A=[]
+    for j in search(query, num=10, stop=1): 
+        A.append(j)
+    return json_response(A)
+    
 if __name__ == '__main__':
     app.run( host=os.environ['IP'], port=os.environ['PORT'] ,debug=True)
