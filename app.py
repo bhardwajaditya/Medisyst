@@ -1,6 +1,6 @@
 import pymongo
 from pymongo import MongoClient
-from flask import Flask, request,make_response
+from flask import Flask, request,make_response,render_template, url_for, request
 import hmac, hashlib
 import base64
 import os
@@ -26,7 +26,7 @@ diagnosis = diagnosisClient.DiagnosisClient(username, password, authUrl, languag
 
 @app.route('/')
 def index():
-    return '<h1>Welcome to Medisyst!</h1>'
+    return render_template('index.html')
 
 @app.route('/symptoms')
 def symptom():
@@ -39,6 +39,10 @@ def symptom():
         }
         A.append(res)
     return json_response(A)
+    
+@app.route('/diagnose')
+def diagnosepage():
+    return render_template('diagnosis.html')
     
 @app.route('/diagnosis')
 def diagnose():
@@ -119,6 +123,8 @@ def signin():
         return "yes"
     else:
         return "no"
+
+
         
 @app.route('/search')
 def gsearch():
