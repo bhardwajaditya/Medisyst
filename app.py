@@ -23,7 +23,7 @@ diagnosis = diagnosisClient.DiagnosisClient(username, password, authUrl, languag
 
 @app.route('/')
 def index():
-    return '<h1>Welcome to Tweety!</h1>'
+    return '<h1>Welcome to Medisyst!</h1>'
 
 @app.route('/symptoms')
 def symptom():
@@ -40,8 +40,33 @@ def symptom():
 @app.route('/diagnosis')
 def diagnose():
     if(request.method=='GET'):
-        info = diagnosis.loadDiagnosis([13,28],diagnosisClient.Gender.Male,1998)
+        symptomID = request.args.get('ID')
+        gender = request.args.get('gender')
+        dob = request.args.get('DOB')
+        symptomID=symptomID.split(',')
+        info = diagnosis.loadDiagnosis(symptomID,gender,int(dob))
+        psymptoms = diagnosis.loadProposedSymptoms(symptomID,gender,int(dob))
+        info.append(psymptoms)
         return json_response(info)
+
+@app.route('/bodylocations')
+def bodylocations():
+    A=[]
+    bodylocation = diagnosis.loadBodyLocations()
+    for i in bodylocation:
+        res={
+            'Name':i['Name'],
+            'ID':i['ID']
+        }
+        A.append(res)
+    return json_response(A)
+
+@app.route('/sublocations')
+def sublocations():
+    bodyID=request.args.get('ID')
+    gender = request.args.get('Gender')
+    slocations = diagnosis.loadSublocationSymptoms(bodyID,int(gender))
+    return json_response(slocations)
     
 if __name__ == '__main__':
     app.run( host=os.environ['IP'], port=os.environ['PORT'] ,debug=True)

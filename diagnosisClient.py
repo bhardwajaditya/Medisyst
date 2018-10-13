@@ -125,7 +125,7 @@ class DiagnosisClient:
             raise ValueError("selectedSymptoms can not be empty")
         
         serializedSymptoms = json.dumps(selectedSymptoms)
-        action = "diagnosis?symptoms={0}&gender={1}&year_of_birth={2}".format(serializedSymptoms, gender.name, yearOfBirth)
+        action = "diagnosis?symptoms={0}&gender={1}&year_of_birth={2}".format(serializedSymptoms, gender, yearOfBirth)
         return self._loadFromWebService(action)
 
 
@@ -172,7 +172,7 @@ class DiagnosisClient:
     # <param name="selectedSelectorStatus">Selector status (Man, Woman, Boy, Girl)</param>
     # <returns>Returns list of all symptoms for selected human body location</returns>
     def loadSublocationSymptoms(self, locationId, selectedSelectorStatus):
-        action = "symptoms/{0}/{1}".format(locationId, selectedSelectorStatus.name)
+        action = "symptoms/{0}/{1}".format(locationId, selectedSelectorStatus)
         return self._loadFromWebService(action)
 
 
@@ -188,7 +188,7 @@ class DiagnosisClient:
             raise ValueError("selectedSymptoms can not be empty")
         
         serializedSymptoms = json.dumps(selectedSymptoms)
-        action = "symptoms/proposed?symptoms={0}&gender={1}&year_of_birth={2}".format(serializedSymptoms, gender.name, yearOfBirth)
+        action = "symptoms/proposed?symptoms={0}&gender={1}&year_of_birth={2}".format(serializedSymptoms, gender, yearOfBirth)
         return self._loadFromWebService(action)
 
 
