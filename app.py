@@ -1,7 +1,10 @@
 import pymongo
 from pymongo import MongoClient
 from flask import Flask, request,make_response
+import hmac, hashlib
+import base64
 import os
+import datetime
 import csv
 import diagnosisClient
 from commons import json_response
@@ -67,6 +70,13 @@ def sublocations():
     gender = request.args.get('Gender')
     slocations = diagnosis.loadSublocationSymptoms(bodyID,int(gender))
     return json_response(slocations)
-    
+
+@app.route('/key')
+def generate():
+    x=request.args.get('name')
+    x=x+str(datetime.datetime.now())
+    rawHashString = hmac.new(bytes(x, encoding='utf-8'), x.encode('utf-8')).digest()
+    computedHashString = base64.b64encode(rawHashString).decode()
+    return computedHashString
 if __name__ == '__main__':
     app.run( host=os.environ['IP'], port=os.environ['PORT'] ,debug=True)
