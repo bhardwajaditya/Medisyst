@@ -16,6 +16,7 @@ client = MongoClient()
 db = client['medisyst']
 users = db.users
 doctors=db.doctors
+addrequests=db.addrequests
 
 username = "aditya.1998bhardwaj@gmail.com"
 password = "Wd85RaFy76Xrw3QBx"
@@ -125,6 +126,35 @@ def home(ID):
     print(doc['patients'])
     return render_template('home.html',doc=doc)
 
+@app.route('/home/<ID>/addkey')
+def addkey(ID):
+    if(request.method=="POST"):
+        name=request.form['name']
+        email=request.form['email']
+        used="No"
+        permission="No"
+        x = name+str(datetime.datetime.now())
+        rawHashString = hmac.new(bytes(x, encoding='utf-8'), x.encode('utf-8')).digest()
+        key = base64.b64encode(rawHashString).decode()
+        req={
+            'name':name,
+            'email':email,
+            'used':used,
+            'permission':permission,
+            'key':key
+        }
+        y=addrequests.insert_one(req)
+        url="/home/"+ID
+        return redirect(url)
+        
+@app.route('/home/<ID>/add')
+def add(ID):
+    if(request.method=="GET"):
+        return render_template("add.html")
+    if(request.method=="POST"):
+        key=request.form['key']
+        result = add.requests
+        
 @app.route('/sublocations')
 def sublocations():
     bodyID=request.args.get('ID')
