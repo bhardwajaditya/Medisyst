@@ -10,14 +10,29 @@
 
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-		
+		<style>
+            .table .thead-dark th{
+                background-color:#ffc116;
+                border-color:#ffc116;
+            }
+            .btn-primary{
+                background-color: #0000;
+                color:#000000;
+                border-color: #ffc116;
+            }
+            .btn-primary:hover{
+                background-color: #ffc116;
+                color:#ffffff;
+                border-color:#ffc116;
+            }
+        </style>
 
 	</head>
 	<body>
 	    
 	    <nav class="navbar navbar-expand-lg navbar-light bg fixed-top">
 	        <div class="container">
-  <a class="navbar-brand head2" href="#">MediSyst</a>
+  <a class="navbar-brand head2" href="/">MediSyst</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -64,6 +79,27 @@
             </div>
         </div>
     </div>
+{% else %}
+    <table class="table">
+  <thead  class="thead-dark">
+    <tr>
+      <th scope="col">Email</th>
+      <th scope="col">First Name</th>
+      <th scope="col">Last Name</th>
+      <th scope="col">Aadhaar Number</th>
+      
+    </tr>
+  </thead>
+    {% for i in doc['patients']%}
+    <tr>
+        
+        <td>{{ i['email'] }}</td>
+        <td>{{ i['fname'] }}</td>
+        <td>{{ i['lname'] }}</td>
+        <td>{{ i['aadhaar'] }}</td>
+        </tr>
+    {% endfor %}
+</table>
 {% endif %}
 </div>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>

@@ -18,11 +18,13 @@ users = db.users
 doctors=db.doctors
 addrequests=db.addrequests
 
+
 username = "aditya.1998bhardwaj@gmail.com"
 password = "Wd85RaFy76Xrw3QBx"
 authUrl = "https://sandbox-authservice.priaid.ch/login"
 healthUrl = "https://sandbox-healthservice.priaid.ch"
 language = "en-gb"
+
 
 app = Flask(__name__)
 diagnosis = diagnosisClient.DiagnosisClient(username, password, authUrl, language, healthUrl)
@@ -122,10 +124,10 @@ def home(ID):
     addurl=url+"/add"
     return render_template('home.html',doc=doc,addurl=addurl)
 
-@app.route('/home/<ID>/addkey')
+@app.route('/home/<ID>/addkey',methods = ['POST', 'GET'])
 def addkey(ID):
     if(request.method=="POST"):
-        name=request.form['name']
+        name=request.form['Name']
         email=request.form['email']
         used="No"
         permission="No"
@@ -134,7 +136,6 @@ def addkey(ID):
         key = base64.b64encode(rawHashString).decode()
         req={
             'name':name,
-            'docid':ID,
             'email':email,
             'used':used,
             'permission':permission,
@@ -145,12 +146,13 @@ def addkey(ID):
         return redirect(url)
 
         
-@app.route('/home/<ID>/add')
+@app.route('/home/<ID>/add',methods = ['POST', 'GET'])
 def add(ID):
     if(request.method=="GET"):
         error=""
         url="/home/"+ID
-        return render_template("add.html",error=error,url=url)
+        addkey=url+"/addkey"
+        return render_template("add.html",error=error,url=url,addkey=addkey)
     if(request.method=="POST"):
         url="/home/"+ID
         key=request.form['key']
@@ -170,19 +172,48 @@ def add(ID):
                 A=doc['patients']
                 A.append(patient)
             doc1=doctors.update_one({'_id':ObjectId(ID)},{'$set':{'patients':A}})
-            return render_template('addrecord.html',email=result['email'])
+            return render_template('addrecord.html',patient=patient,url=url)
         
-
+@app.route('/history',methods = ['POST', 'GET'])
+def history():
+    if(request.method=="GET"):
+        email=request.args.get('email')
+        user=users.find_one({'email':email})
+        return json_response(user)
+    if(request.method=="POST"):
+        name=request.form['name']
+        date=request.form['date']
+        email=request.form['email']
+        docname=request.form['docname']
+        profname=request.form['profname']
+        treatment=request.form['treatment']
+        ID=request.form['ID']
+        doc={
+            'name':name,
+            'date':date,
+            'profname':profname,
+            'docname':docname,
+            'treatment':treatment
+        }
+        user=users.find_one({'email':email})
+        if(user['history']=="None"):
+            A=[doc]
+        else:
+            A=user['history']
+            A.append(doc)
+            user1=user.update_one({'email':email},{'$set':{'history':A}})
+            url="/home/"+ID
+            return redirect(url)
+    
 
 @app.route('/key')
 def generate():
     email=request.args.get('email')
-    req = addrequests.find({'email':email})
+    req = addrequests.find({})
     A=[]
     for i in req:
-        A.append({'name':i['Name'],'ID':i['docid']})
+        A.append({'name':i['name'],'key':i['key'],'permission':i['permission'],'used':i['used']})
     return json_response(A)
-    
     
 @app.route('/signup')
 def signup():
@@ -205,7 +236,8 @@ def signup():
             "gender":gender,
             "fname":fname,
             "lname":lname,
-            "dob":dob
+            "dob":dob,
+            "history":"None"
         }
         x=users.insert_one(user)
         print(x)
