@@ -22,8 +22,8 @@ addrequests=db.addrequests
 #         "permission": "Yes",
 #         "used": "No",
 #         "name": "Aditya Bhardwaj",
-#         "key": "abc",
-#         "email":"aditya.1998bhardwaj@gmail.com"
+#         "key": "abcd",
+#         "email":"Aditya@gmail.com"
         
 #     })
 
@@ -185,6 +185,7 @@ def add(ID):
         url="/home/"+ID
         key=request.form['key']
         result = addrequests.find_one({'key':key})
+        print(result['email'])
         if(result['used']=="Yes" or result['permission']=="No"):
             error="Key not valid"
             
@@ -194,12 +195,13 @@ def add(ID):
             print(x)
             patient=users.find_one({'email':result['email']})
             doc=doctors.find_one({'_id':ObjectId(ID)})
+            print(doc)
             print(patient)
             if(doc['patients']=="None"):
                 A=[patient]
             else:
                 A=doc['patients']
-                A.append(patient['history'])
+                A.append(patient)
             doc1=doctors.update_one({'_id':ObjectId(ID)},{'$set':{'patients':A}})
             return render_template('addrecord.html',patient=patient,url=url)
         
@@ -251,35 +253,25 @@ def allow():
     addrequests.update_one({'key':key},{'$set':{'allowed':'Yes'}})
     return "Yes"
     
-@app.route('/signup')
+@app.route('/tempsignup')
 def signup():
     email=request.args.get('email')
     password=request.args.get('password')
-    aadhaar = request.args.get('aadhaar')
-    gender = request.args.get('gender')
-    fname = request.args.get('fname')
-    lname =request.args.get('lname')
-    dob = request.args.get('dob')
+    # aadhaar = request.args.get('aadhaar')
+    # gender = request.args.get('gender')
+    # fname = request.args.get('fname')
+    # lname =request.args.get('lname')
+    # dob = request.args.get('dob')
     A=[]
-    x=users.find({"email":email})
-    for i in x:
-        A.append(x)
-    if(len(A)==0):
-        user={
-            "email":email,
-            "password":password,
-            "aadhaar":aadhaar,
-            "gender":gender,
-            "fname":fname,
-            "lname":lname,
-            "dob":dob,
-            "history":"None"
+    user={
+        "email":email,
+        "password":password,
+        "history":"None"
         }
-        x=users.insert_one(user)
-        print(x)
-        return "yes"
-    else:
-        return 'no'
+    x=users.insert_one(user)
+    print(x)
+    return "1"
+    
 
 @app.route('/login')
 def signin():
@@ -289,12 +281,33 @@ def signin():
     x=users.find_one({"email":email})
     print(x)
     if(x['password']==password):
-        return "yes"
+        return "1"
     else:
-        return "no"
+        return "0"
 
+@app.route('/update')
+def update1():
+    email=request.args.get('email')
+    aadhaar = request.args.get('aadhaar')
+    gender = request.args.get('gender')
+    fname = request.args.get('fname')
+    lname =request.args.get('lname')
+    dob = request.args.get('dob')
+    x=users.update_one({'email':email},{'$set':{gender:gender,aadhaar:aadhaar,fname:fname,lname:lname,dob:dob}})
+    return "1"
 
-        
+@app.route('/check')
+def check():
+    email=request.args.get('email')
+    x=users.find({'email':email})
+    A=[]
+    for i in x:
+        A.append(i)
+    if(len(A)==0):
+        return "0"
+    else:
+        return "1"
+    
 @app.route('/search')
 def gsearch():
     query = request.args.get('query')
