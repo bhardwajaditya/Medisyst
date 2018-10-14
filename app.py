@@ -10,7 +10,8 @@ import diagnosisClient
 from googlesearch import search
 from commons import json_response
 from bson.objectid import ObjectId
-
+import csv
+import io
 
 client = MongoClient()
 db = client['medisyst']
@@ -18,20 +19,21 @@ users = db.users
 doctors=db.doctors
 addrequests=db.addrequests
 
-addrequests.insert_one({
-        "permission": "Yes",
-        "used": "No",
-        "name": "Aditya Bhardwaj",
-        "key": "w2",
-        "email":"Aditya@gmail.com"
+# addrequests.insert_one({
+#         "permission": "Yes",
+#         "used": "No",
+#         "name": "Aditya Bhardwaj",
+#         "key": "w1",
+#         "email":"aditya@gmail.com"
         
-    })
+#     })
+
 
 # users.delete_many({})
 # doctors.delete_many({})
 # addrequests.delete_many({})
 
-x=users.find()
+x=doctors.find()
 for i in x:
     print(i)
 
@@ -258,15 +260,23 @@ def generate():
     req = addrequests.find({'email':email})
     A=[]
     for i in req:
-        print(i)
-        A.append({'name':i['name'],'key':i['key'],'permission':i['permission'],'used':i['used']})
+        if(i['used']=="No" and i['permission']=="No"):
+            A.append({'name':i['name'],'key':i['key'],'permission':i['permission'],'used':i['used']})
     return json_response(A)
+    
+@app.route('/reject')
+def reject():
+    key=request.args.get('key')
+    deletedkey=addrequests.delete_one({'key':key})
+    print(deletedkey)
+    return "1"
     
 @app.route('/allow')
 def allow():
     key=request.args.get('key')
-    addrequests.update_one({'key':key},{'$set':{'allowed':'Yes'}})
-    return "Yes"
+    x=addrequests.update_one({'key':key},{'$set':{'permission':'Yes'}})
+    print(x)
+    return "1"
     
 @app.route('/tempsignup')
 def signup():
@@ -330,6 +340,27 @@ def gsearch():
     for j in search(query, num=10, stop=1): 
         A.append(j)
     return json_response(A)
+    
+@app.route('/csv')
+def getcsv():
+    email=request.args.get('email')
+    si = io.StringIO()
+    imp_fields = ['Disease','ProfName', 'Date', 'Doctor Name', 'Treatment']
+    writer = csv.writer(si)
+    writer.writerow(imp_fields)
+    user=users.find_one({'email':email})
+    for i in user['history']:
+        writer.writerow([
+            i['name'],
+			i['profname'],
+			i['date'],
+			i['docname'],
+			i['treatment'],	
+		])
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
     
 if __name__ == '__main__':
     app.run( host=os.environ['IP'], port=os.environ['PORT'] ,debug=True)
