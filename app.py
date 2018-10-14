@@ -33,7 +33,7 @@ addrequests=db.addrequests
 # doctors.delete_many({})
 # addrequests.delete_many({})
 
-x=docto.find()
+x=doctors.find()
 for i in x:
     print(i)
 
@@ -62,7 +62,7 @@ def symptom():
             'ID':i['ID']
         }
         A.append(res)
-    return json_response(ID)
+    return json_response(A)
     
 @app.route('/diagnose')
 def diagnosepage():
