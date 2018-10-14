@@ -60,7 +60,7 @@ def symptom():
             'ID':i['ID']
         }
         A.append(res)
-    return json_response(ID)
+    return json_response(A)
     
 @app.route('/diagnose')
 def diagnosepage():
