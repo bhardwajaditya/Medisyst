@@ -79,26 +79,40 @@
         </div>
     </div>
 {% else %}
-    <table class="table">
-  <thead  class="thead-dark">
-    <tr>
-      <th scope="col">Email</th>
-      <th scope="col">First Name</th>
-      <th scope="col">Last Name</th>
-      <th scope="col">Aadhaar Number</th>
+<br>
+<br>
+<h4> <p align="center" >Welcome Dr. {{doc['fname']}}</p></h4>
+  <!--  <table class="table">-->
+  <!--<thead  class="thead-dark">-->
+  <!--  <tr>-->
+  <!--    <th scope="col">Email</th>-->
+  <!--    <th scope="col">First Name</th>-->
+  <!--    <th scope="col">Last Name</th>-->
+  <!--    <th scope="col">Aadhaar Number</th>-->
       
-    </tr>
-  </thead>
+  <!--  </tr>-->
+  <div class="row text-center" style="display:flex ; flex-wrap:wrap">
     {% for i in doc['patients']%}
-    <tr>
+    <div class="col-md-4 col-sm-6 justify-content-center">
+    <div class="card" style="width: 18rem;">
+        <img class="card-img-top" src="{{ url_for('static', filename='smiley.jpg') }}" alt="Card image cap">
+  <div class="card-body">
+    <h5 class="card-title">{{ i['fname'] }} {{ i['lname'] }}</h5>
+    <h6 class="card-subtitle mb-2 text-muted">{{ i['email'] }}</h6>
+    <p class="card-text">{{ i['aadhaar'] }}</p>
+  </div>
+</div>
+</div> &nbsp
+
+    <!--<tr>-->
         
-        <td>{{ i['email'] }}</td>
-        <td>{{ i['fname'] }}</td>
-        <td>{{ i['lname'] }}</td>
-        <td>{{ i['aadhaar'] }}</td>
-        </tr>
+    <!--    <td>{{ i['email'] }}</td>-->
+    <!--    <td>{{ i['fname'] }}</td>-->
+    <!--    <td>{{ i['lname'] }}</td>-->
+    <!--    <td>{{ i['aadhaar'] }}</td>-->
+    <!--    </tr>-->
     {% endfor %}
-</table>
+</div>
 {% endif %}
 </div>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>

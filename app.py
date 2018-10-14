@@ -18,14 +18,14 @@ users = db.users
 doctors=db.doctors
 addrequests=db.addrequests
 
-# addrequests.insert_one({
-#         "permission": "Yes",
-#         "used": "No",
-#         "name": "Aditya Bhardwaj",
-#         "key": "abcd",
-#         "email":"Aditya@gmail.com"
+addrequests.insert_one({
+        "permission": "Yes",
+        "used": "No",
+        "name": "Aditya Bhardwaj",
+        "key": "w2",
+        "email":"Aditya@gmail.com"
         
-#     })
+    })
 
 # users.delete_many({})
 # doctors.delete_many({})
@@ -150,6 +150,7 @@ def home(ID):
     print(doc['patients'])
     url="/home/"+str(doc['_id'])
     addurl=url+"/add"
+    print(doc['fname'])
     return render_template('home.html',doc=doc,addurl=addurl)
 
 @app.route('/home/<ID>/addkey',methods = ['POST', 'GET'])
@@ -201,16 +202,20 @@ def add(ID):
                 A=[patient]
             else:
                 A=doc['patients']
-                A.append(patient)
+                if(patient not in A):
+                    A.append(patient)
             doc1=doctors.update_one({'_id':ObjectId(ID)},{'$set':{'patients':A}})
-            return render_template('addrecord.html',patient=patient,url=url)
+            return render_template('addrecord.html',patient=patient,url=url,ID=ID,email=patient['email'])
         
 @app.route('/history',methods = ['POST', 'GET'])
 def history():
     if(request.method=="GET"):
         email=request.args.get('email')
         user=users.find_one({'email':email})
-        return json_response(user['history'])
+        if(user['history']=="None"):
+            return "None"
+        else:
+            return json_response(user['history'])
     if(request.method=="POST"):
         name=request.form['name']
         date=request.form['date']
@@ -232,15 +237,25 @@ def history():
         else:
             A=user['history']
             A.append(doc)
-            user1=user.update_one({'email':email},{'$set':{'history':A}})
-            url="/home/"+ID
-            return redirect(url)
+        user1=users.update_one({'email':email},{'$set':{'history':A}})
+        url="/home/"+ID
+        return redirect(url)
+
+@app.route('/details')
+def details():
+    email=request.args.get('email')
+    user=users.find_one({'email':email})
+    doc = {
+        'dob':user['dob'],
+        'gender':user['gender']
+    }
     
+    return json_response(doc)
 
 @app.route('/key')
 def generate():
     email=request.args.get('email')
-    req = addrequests.find({})
+    req = addrequests.find({'email':email})
     A=[]
     for i in req:
         print(i)
@@ -293,7 +308,7 @@ def update1():
     fname = request.args.get('fname')
     lname =request.args.get('lname')
     dob = request.args.get('dob')
-    x=users.update_one({'email':email},{'$set':{gender:gender,aadhaar:aadhaar,fname:fname,lname:lname,dob:dob}})
+    x=users.update_one({'email':email},{'$set':{'gender':gender,'aadhaar':aadhaar,'fname':fname,'lname':lname,'dob':dob}})
     return "1"
 
 @app.route('/check')

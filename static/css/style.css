@@ -47,3 +47,6 @@ body{
 .head2:hover{
 	color: black;
 }
+.jumbotron{
+    background-color:white;
+}
