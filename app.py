@@ -33,7 +33,9 @@ addrequests=db.addrequests
 # doctors.delete_many({})
 # addrequests.delete_many({})
 
-
+x=docto.find()
+for i in x:
+    print(i)
 
 username = "aditya.1998bhardwaj@gmail.com"
 password = "Wd85RaFy76Xrw3QBx"
@@ -60,7 +62,7 @@ def symptom():
             'ID':i['ID']
         }
         A.append(res)
-    return json_response(A)
+    return json_response(ID)
     
 @app.route('/diagnose')
 def diagnosepage():
