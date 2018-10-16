@@ -52,6 +52,10 @@ diagnosis = diagnosisClient.DiagnosisClient(username, password, authUrl, languag
 def index():
     return render_template('index.html')
 
+@app.route('/connection')
+def connection():
+    return "1"
+
 @app.route('/symptoms')
 def symptom():
     A=[]
