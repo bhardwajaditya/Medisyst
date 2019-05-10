@@ -13,7 +13,7 @@ from bson.objectid import ObjectId
 import csv
 import io
 
-client = pymongo.MongoClient("mongodb+srv://Aditya:inverter@cluster0-kulfh.mongodb.net/medisyst?retryWrites=true")
+client = pymongo.MongoClient("mongodb://Aditya:inverter@cluster0-kulfh.mongodb.net/medisyst?retryWrites=true")
 db = client.medisyst
 users = db.users
 doctors=db.doctors
