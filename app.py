@@ -13,8 +13,8 @@ from bson.objectid import ObjectId
 import csv
 import io
 
-client = MongoClient()
-db = client['medisyst']
+client = pymongo.MongoClient("mongodb://Aditya:inverter@cluster0-shard-00-00-kulfh.mongodb.net:27017,cluster0-shard-00-01-kulfh.mongodb.net:27017,cluster0-shard-00-02-kulfh.mongodb.net:27017/medisyst?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true")
+db = client.medisyst
 users = db.users
 doctors=db.doctors
 addrequests=db.addrequests
@@ -23,7 +23,7 @@ addrequests=db.addrequests
 #         "permission": "Yes",
 #         "used": "No",
 #         "name": "Aditya Bhardwaj",
-#         "key": "w1",
+#         "key": "w123",
 #         "email":"aditya@gmail.com"
         
 #     })
@@ -33,9 +33,9 @@ addrequests=db.addrequests
 # doctors.delete_many({})
 # addrequests.delete_many({})
 
-x=doctors.find()
-for i in x:
-    print(i)
+# x=doctors.find()
+# for i in x:
+#     print(i)
 
 username = "aditya.1998bhardwaj@gmail.com"
 password = "Wd85RaFy76Xrw3QBx"
@@ -162,6 +162,7 @@ def home(ID):
 @app.route('/home/<ID>/addkey',methods = ['POST', 'GET'])
 def addkey(ID):
     if(request.method=="POST"):
+        doc=doctors.find_one({'_id':ObjectId(ID)})
         name=request.form['Name']
         email=request.form['email']
         used="No"
@@ -169,7 +170,9 @@ def addkey(ID):
         x = name+str(datetime.datetime.now())
         rawHashString = hmac.new(bytes(x, encoding='utf-8'), x.encode('utf-8')).digest()
         key = base64.b64encode(rawHashString).decode()
+        key=key[:5]
         req={
+            'docEmail':doc['email'],
             'name':name,
             'email':email,
             'used':used,
@@ -192,6 +195,10 @@ def add(ID):
         url="/home/"+ID
         key=request.form['key']
         result = addrequests.find_one({'key':key})
+        if(result==None):
+            error="key not valid"
+            addkey=url+"/addkey"
+            return render_template('add.html',url=url,error=error,addkey=addkey)
         print(result['email'])
         if(result['used']=="Yes" or result['permission']=="No"):
             error="Key not valid"
@@ -199,7 +206,7 @@ def add(ID):
             return render_template('add.html',error=error,url=url)
         else:
             x=addrequests.update_one({'key':key},{'$set':{'used':"Yes"}})
-            print(x)
+            doc=doctors.find_one({'_id':ObjectId(ID)})
             patient=users.find_one({'email':result['email']})
             doc=doctors.find_one({'_id':ObjectId(ID)})
             print(doc)
@@ -211,7 +218,8 @@ def add(ID):
                 if(patient not in A):
                     A.append(patient)
             doc1=doctors.update_one({'_id':ObjectId(ID)},{'$set':{'patients':A}})
-            return render_template('addrecord.html',patient=patient,url=url,ID=ID,email=patient['email'])
+            x=addrequests.delete_one({'key':key})
+            return render_template('addrecord.html',patient=patient,url=url,ID=ID,email=patient['email'],doc=doc)
         
 @app.route('/history',methods = ['POST', 'GET'])
 def history():
@@ -343,6 +351,14 @@ def gsearch():
     A=[]
     for j in search(query, num=10, stop=1): 
         A.append(j)
+    return json_response(A)
+    
+@app.route('/getkey')
+def keys():
+    key = addrequests.find()
+    A=[]
+    for i in key:
+        A.append({'name':i['name'],'key':i['key'],'permission':i['permission'],'used':i['used'],'docEmail':i['docEmail'],'email':i['email']})
     return json_response(A)
     
 @app.route('/csv')
