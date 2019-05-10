@@ -27,4 +27,4 @@ six==1.5.2
 tornado==3.1.1
 urllib3==1.7.1
 wheel==0.24.0
-uwsgi==1.1.2
+uwsgi==2.0.18
