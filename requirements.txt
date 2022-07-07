@@ -21,7 +21,7 @@ pymongo==3.7.2
 pyparsing==2.0.1
 python-dateutil==2.1
 pytz==2012c
-requests==2.2.1
+requests==2.20.0
 simplegeneric==0.8.1
 six==1.5.2
 tornado==3.1.1
